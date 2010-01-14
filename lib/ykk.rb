@@ -18,10 +18,11 @@ class YKK
     @instance.inspect
   end
 
-  attr_accessor :dir
+  attr_accessor :dir, :searchable
 
-  def initialize(dir = nil)
+  def initialize(dir = nil, searchable = false)
     self.dir = dir
+    self.searchable = searchable
   end
 
   def <<(value)
@@ -50,7 +51,7 @@ class YKK
     y = value.to_yaml
     y.force_encoding(Encoding::UTF_8) unless /\A1.8/ === RUBY_VERSION # FIXME
     File.open(path, 'wb') { |f| f << y }
-    ngram_gen(y, NGRAM_N, key)
+    ngram_gen(y, NGRAM_N, key) if searchable
   end
 
   def ngram_path(a)
