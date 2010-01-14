@@ -48,6 +48,7 @@ class YKK
     dirname = File.dirname(path)
     FileUtils.mkdir_p(dirname) unless File.exists?(dirname)
     y = value.to_yaml
+    y.force_encoding(Encoding::UTF_8) unless /\A1.8/ === RUBY_VERSION # FIXME
     File.open(path, 'wb') { |f| f << y }
     ngram_gen(y, NGRAM_N, key)
   end
@@ -57,8 +58,7 @@ class YKK
   end
 
   def ngram_func(text, n)
-    r = /\a1.8/ === RUBY_VERSION ? //u : //
-    text.split(r).each_cons(n).map(&:join).uniq.each do |a|
+    text.split(//u).each_cons(n).map(&:join).uniq.each do |a|
       yield a
     end
   end
@@ -75,6 +75,7 @@ class YKK
       paths << ngram_path(a)
     end
     keychains = paths.uniq.map do |path|
+      return [] unless File.exist?(path)
       File.open(path) { |f| f.readlines.uniq.map(&:chomp) }
     end
     keychain = keychains.reduce { |x, y| x & y }
